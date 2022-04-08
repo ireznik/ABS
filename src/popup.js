@@ -7,6 +7,8 @@ const iterationCount1 = document.getElementById('iteration-count-1');
 const iterationCount2 = document.getElementById('iteration-count-2');
 const iterationCountWrapper = document.getElementById('iteration-count-wrapper');
 
+const REWARDS_URL = "https://rewards.microsoft.com/";
+
 // if we are spoofing desktop searches, show a count labelled 'desktop'. same for mobile.
 // if we are not spoofing anything, then just display an unlabelled count.
 function setCountDisplayText({
@@ -165,25 +167,28 @@ function stopSearches() {
   port.postMessage({ type: constants.MESSAGE_TYPES.STOP_SEARCH });
 }
 
-chrome.commands.onCommand.addListener(command => {
-  if (command === 'start-searches') startSearches();
+chrome.commands.onCommand.addListener((command) => {
+  if (command === "start-searches") startSearches();
 });
-document.getElementById('search').addEventListener('click', startSearches);
+document.getElementById("search").addEventListener("click", startSearches);
 
-document.getElementById('open-reward-tasks').addEventListener('click', async () => {
+document.getElementById("open-reward-tasks").addEventListener("click", async () => {
   const tab = await getCurrentTab();
   function openRewardTasks() {
-    chrome.tabs.sendMessage(tab.id, { type: 'OPEN_REWARD_TASKS' });
+    chrome.tabs.sendMessage(tab.id, { type: "OPEN_REWARD_TASKS" });
   }
-  if (tab && tab.url.includes('https://account.microsoft.com/rewards')) {
-      openRewardTasks();
+  if (tab && tab.url.includes(REWARDS_URL)) {
+    openRewardTasks();
   } else {
-    chrome.tabs.update({
-      url: 'https://account.microsoft.com/rewards',
-    }, () => {
-      // this 5s timeout is hack, but it works for the most part (unless your internet or browser speed is very slow)
-      // and even if it doesn't work, you just have to click the button again
-      setTimeout(openRewardTasks, 5000);
-    });
+    chrome.tabs.update(
+      {
+        url: REWARDS_URL,
+      },
+      () => {
+        // this 5s timeout is hack, but it works for the most part (unless your internet or browser speed is very slow)
+        // and even if it doesn't work, you just have to click the button again
+        setTimeout(openRewardTasks, 5000);
+      }
+    );
   }
 });
